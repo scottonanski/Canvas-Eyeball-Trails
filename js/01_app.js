@@ -119,7 +119,7 @@ function init() {
   
     camera.position.z = 5;
 
-  const floatingEyesPerSquareUnit = 0.001; // Adjust this value to change the density of floating eyes
+  const floatingEyesPerSquareUnit = 0.0008; // Adjust this value to change the density of floating eyes
     const viewportArea = window.innerWidth * window.innerHeight;
     const numberOfFloatingEyes = Math.floor(viewportArea * floatingEyesPerSquareUnit);
   
@@ -161,26 +161,20 @@ function rotateCubeTowardsMouse() {
     if (distance > minDistanceThreshold) {
         const angleX = deltaY / distance * (Math.PI / 2) * (distance / maxDistance);
         const angleY = deltaX / distance * (Math.PI / 2) * (distance / maxDistance);
-
         targetRotationX = angleX;
         targetRotationY = angleY;
     }
 }
 
-
 function animate() {
     requestAnimationFrame(animate);
-
     if (mouse.x !== undefined && mouse.y !== undefined) {
         const dampingFactor = 0.07;
         cube.rotation.x += (targetRotationX - cube.rotation.x) * dampingFactor;
         cube.rotation.y += (targetRotationY - cube.rotation.y) * dampingFactor;
     }
-  
     renderer.render(scene, camera);
-
     ctx.clearRect(0, 0, innerWidth, innerHeight);
-
     for (let i = 0; i < particleArray.length; i++) {
         particleArray[i].update();
     }
@@ -202,7 +196,7 @@ function onWindowResize() {
     canvas.height = innerHeight;
   }
 
-  window.addEventListener("resize", onWindowResize, false);
+ window.addEventListener("resize", onWindowResize, false);
   init();
   animate();
 
@@ -210,4 +204,3 @@ setInterval(function () {
     mouse.x = undefined;
     mouse.y = undefined;
 }, 1000);
-
