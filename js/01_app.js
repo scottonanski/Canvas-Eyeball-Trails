@@ -91,6 +91,7 @@ function init() {
   
     renderer = new THREE.WebGLRenderer({
       antialias: true,
+         powerPreference: "high-performance",
       alpha: true
     });
   
