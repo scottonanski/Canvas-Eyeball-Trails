@@ -10,7 +10,7 @@ ctx.canvas.height = window.innerHeight;
 let particleArray = [];
 
 const sprite = new Image();
-sprite.src = 'eyes.png';
+sprite.src = 'https://raw.githubusercontent.com/scottonanski/Canvas-Eyeball-Trails/main/eyes.png';
 
 const maxSize = 8;
 const minSize = 0;
@@ -74,7 +74,6 @@ Particle.prototype.update = function () {
 
 function init() {
 
-
     scene = new THREE.Scene();
 
     cubeColor = 0xffffff;
@@ -108,7 +107,7 @@ function init() {
     // Instead of using a basic color, we're going to throw in a a texture to make it look pretty!
   
     const texture = new THREE.TextureLoader().load(
-      "snellen.png"
+      "https://raw.githubusercontent.com/scottonanski/Canvas-Eyeball-Trails/main/snellen.png"
     );
     const material = new THREE.MeshPhongMaterial({
       map: texture
@@ -120,8 +119,12 @@ function init() {
   
     camera.position.z = 5;
 
+  const floatingEyesPerSquareUnit = 0.001; // Adjust this value to change the density of floating eyes
+    const viewportArea = window.innerWidth * window.innerHeight;
+    const numberOfFloatingEyes = Math.floor(viewportArea * floatingEyesPerSquareUnit);
+  
     particleArray = [];
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < numberOfFloatingEyes; i++) {
         let radius = 0;
         let x = Math.random() * (innerWidth - radius * 2 - radius * 2 + radius * 2);
         let y = Math.random() * (innerHeight - radius * 2 - radius * 2 + radius * 2);
@@ -139,13 +142,42 @@ function init() {
     }
 }
 
+let targetRotationX = 0;
+let targetRotationY = 0;
+
+// Add a new function to rotate the cube towards the mouse pointer
+function rotateCubeTowardsMouse() {
+    const canvasCenterX = window.innerWidth / 2;
+    const canvasCenterY = window.innerHeight / 2;
+
+    const deltaX = mouse.x - canvasCenterX;
+    const deltaY = mouse.y - canvasCenterY;
+
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const maxDistance = Math.sqrt(canvasCenterX * canvasCenterX + canvasCenterY * canvasCenterY);
+
+    // Add a minimum distance threshold
+    const minDistanceThreshold = 1;
+    if (distance > minDistanceThreshold) {
+        const angleX = deltaY / distance * (Math.PI / 2) * (distance / maxDistance);
+        const angleY = deltaX / distance * (Math.PI / 2) * (distance / maxDistance);
+
+        targetRotationX = angleX;
+        targetRotationY = angleY;
+    }
+}
+
+
 function animate() {
     requestAnimationFrame(animate);
 
-    cube.rotation.x += 0.005;
-    cube.rotation.y += 0.005;
+    if (mouse.x !== undefined && mouse.y !== undefined) {
+        const dampingFactor = 0.07;
+        cube.rotation.x += (targetRotationX - cube.rotation.x) * dampingFactor;
+        cube.rotation.y += (targetRotationY - cube.rotation.y) * dampingFactor;
+    }
+  
     renderer.render(scene, camera);
-
 
     ctx.clearRect(0, 0, innerWidth, innerHeight);
 
@@ -153,6 +185,14 @@ function animate() {
         particleArray[i].update();
     }
 }
+
+// Call the rotateCubeTowardsMouse function in the mousemove event listener
+window.addEventListener("mousemove", function (e) {
+    mouse.x = e.x;
+    mouse.y = e.y;
+    rotateCubeTowardsMouse(); // Update the cube's rotation
+    console.log(mouse);
+});
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -162,15 +202,12 @@ function onWindowResize() {
     canvas.height = innerHeight;
   }
 
-
-
   window.addEventListener("resize", onWindowResize, false);
   init();
   animate();
-
-
 
 setInterval(function () {
     mouse.x = undefined;
     mouse.y = undefined;
 }, 1000);
+
